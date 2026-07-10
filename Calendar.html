@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Доска техничек</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --panel:#141414;
+    --panel-alt:#1B1B1B;
+    --ink:#F5F5F0;
+    --muted:#8C8C86;
+    --line:#2B2B26;
+    --lime:#D7FF3D;
+    --green:#D7FF3D;
+    --amber:#F0B23C;
+    --red:#FF5C6C;
+    --blue:#D7FF3D;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-weight:500;
+    padding:24px 16px 60px;
+  }
+  .board{
+    max-width:1040px;
+    margin:0 auto;
+  }
+
+  .hero-title{
+    text-align:center;
+    max-width:640px;
+    margin:12px auto 32px;
+  }
+  .hero-title .sub{margin-left:auto;margin-right:auto;}
+  .plan-counter{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    margin-top:16px;
+    padding:8px 16px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:13px;
+  }
+  .plan-counter .n{color:var(--lime);font-weight:800;}
+  .plan-counter.done .n{color:var(--lime);}
+  .plan-counter.warn{border-color:rgba(240,178,60,.5);}
+  .plan-counter.warn .n{color:var(--amber);}
+  .plan-counter .bar{
+    width:80px;height:5px;border-radius:3px;
+    background:var(--line);overflow:hidden;
+  }
+  .plan-counter .bar-fill{height:100%;background:var(--lime);}
+  .plan-counter.warn .bar-fill{background:var(--amber);}
+
+  tbody tr.no-free{
+    box-shadow:inset 3px 0 0 var(--amber);
+  }
+  .no-free-flag{
+    color:var(--amber);
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    white-space:nowrap;
+  }
+  .archive-item{
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--panel-alt);
+  }
+  .archive-item .arch-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;
+  }
+  .archive-item .arch-meta{color:var(--muted);font-size:11.5px;font-weight:600;margin-top:2px;}
+  .archive-item .arch-people{
+    margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;
+  }
+  .archive-item .arch-chip{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    padding:3px 8px;border-radius:6px;border:1px solid var(--line);color:var(--muted);
+  }
+  .archive-item .arch-chip.has{color:var(--ink);border-color:rgba(215,255,61,.35);}
+  .archive-del{
+    background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 6px;border-radius:5px;
+  }
+  .archive-del:hover{color:var(--red);background:rgba(255,92,108,.1);}
+
+  .top{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    align-items:flex-end;
+    justify-content:flex-start;
+    margin-bottom:18px;
+  }
+  .top > div:first-child{flex:1 1 320px;max-width:420px;}
+  .week-field label, .oblig-field label{
+    display:block;
+    font-size:11px;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+    font-weight:700;
+  }
+  input[type=text], textarea{
+    background:var(--panel-alt);
+    border:1px solid var(--line);
+    color:var(--ink);
+    border-radius:6px;
+    padding:8px 10px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13px;
+  }
+  .week-field input{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:19px;
+    width:220px;
+  }
+  .oblig-field textarea{
+    width:340px;
+    height:38px;
+    resize:vertical;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:34px;
+    font-weight:700;
+    margin:0 0 8px;
+    letter-spacing:-.02em;
+    color:#FFFFFF;
+    text-transform:uppercase;
+  }
+  h1 .accent{color:var(--lime);}
+  .sub{
+    color:var(--muted);
+    font-weight:600;
+    font-size:13.5px;
+    margin:0 0 18px;
+    max-width:520px;
+  }
+  .reset-btn{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    padding:10px 16px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    white-space:nowrap;
+    transition:.15s;
+  }
+  .reset-btn:hover{border-color:var(--red);color:var(--red);}
+
+  #checklistBody td:nth-child(2), #checklistBody td:nth-child(3){text-align:center;}
+  #checklistBody .mand-toggle, #checklistBody .vac-toggle{margin:0 auto;}
+  .table-scroll{overflow-x:auto;border-radius:10px;border:1px solid var(--line);}
+  table{
+    width:100%;
+    min-width:760px;
+    border-collapse:collapse;
+    background:var(--panel);
+  }
+  thead th{
+    text-align:left;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:var(--muted);
+    font-weight:700;
+    padding:12px 12px;
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:0;
+    background:var(--panel);
+    z-index:2;
+  }
+  tbody tr{border-bottom:1px solid var(--line);transition:background .12s;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:rgba(215,255,61,.05);}
+  tbody tr.mandatory{background:rgba(240,178,60,.08);}
+  tbody tr.mandatory:hover{background:rgba(240,178,60,.15);}
+  tbody tr.vacation:hover{background:rgba(255,92,108,.07);}
+  td{padding:9px 12px;vertical-align:middle;}
+  #tableBody td:nth-child(3), #tableBody td:nth-child(4), #tableBody td:nth-child(5), #tableBody td:nth-child(6), #tableBody td:nth-child(7){text-align:center;}
+  #tableBody td:nth-child(3) .chip, #tableBody td:nth-child(4) .chip{margin:0 auto;}
+  #tableBody td:nth-child(6) .mand-toggle{margin:0 auto;}
+  .name-cell{display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14.5px;}
+  .star{color:var(--amber);font-size:13px;}
+  .free-input{width:100%;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:12px;}
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:48px;
+    height:32px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--panel-alt);
+    font-family:'JetBrains Mono',monospace;
+    font-weight:800;
+    font-size:13px;
+    cursor:pointer;
+    user-select:none;
+    transition:.15s;
+    gap:6px;
+    padding:0 10px;
+  }
+  .chip .lamp{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--muted);
+    transition:.15s;
+  }
+  .chip:hover{border-color:var(--blue);}
+  .chip[data-n="1"] .lamp, .chip[data-n="2"] .lamp{background:var(--green);}
+  .chip[data-n="1"], .chip[data-n="2"]{border-color:rgba(215,255,61,.4);}
+  .chip[data-n="3"]{border-color:rgba(255,92,108,.5);background:rgba(255,92,108,.1);}
+  .chip[data-n="3"] .lamp{background:var(--red);}
+  .chip:active{transform:scale(.94);}
+  .total-cell{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:13px;}
+  .total-cell.ok{color:var(--blue);}
+  .total-cell.full{color:var(--amber);}
+  .total-cell.over{color:var(--red);}
+  .mand-toggle{
+    width:20px;height:20px;
+    border-radius:5px;
+    border:1px solid var(--line);
+    background:var(--panel-alt);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--amber);
+    font-size:12px;
+  }
+  .mand-toggle.active{background:rgba(240,178,60,.18);border-color:var(--amber);}
+  .vac-toggle{
+    width:20px;height:20px;
+    border-radius:5px;
+    border:1px solid var(--line);
+    background:var(--panel-alt);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--red);
+    font-size:12px;
+  }
+  .vac-toggle.active{background:rgba(255,92,108,.15);border-color:var(--red);}
+  tbody tr.vacation .name-cell{text-decoration:line-through;opacity:.6;}
+
+  .suggest-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .suggest-card summary{
+    cursor:pointer;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    list-style:none;
+    color:var(--ink);
+  }
+  .suggest-card summary::-webkit-details-marker{display:none;}
+  .suggest-card summary::after{content:' ▾';color:var(--muted);}
+  .suggest-card[open] summary::after{content:' ▴';}
+  .suggest-list{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
+  .suggest-item{
+    display:flex;flex-direction:column;gap:4px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--panel-alt);
+  }
+  .suggest-names{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;}
+  .suggest-empty{font-size:12px;color:var(--muted);font-weight:600;}
+  .del-btn{
+    background:none;border:none;color:var(--muted);
+    cursor:pointer;font-size:16px;padding:4px 8px;
+    border-radius:5px;
+  }
+  .del-btn:hover{color:var(--red);background:rgba(255,92,108,.1);}
+
+  .cal-upload-btn{
+    width:32px;height:32px;flex-shrink:0;
+    border-radius:6px;
+    border:1px solid var(--line);
+    background:var(--panel-alt);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    font-size:13px;
+    transition:.15s;
+  }
+  .cal-upload-btn:hover{border-color:var(--blue);background:rgba(215,255,61,.12);}
+
+  .overlap-badge{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    font-size:11.5px;
+    padding:4px 8px;
+    border-radius:6px;
+    display:inline-block;
+    white-space:nowrap;
+    border:1px solid var(--line);
+    color:var(--muted);
+  }
+  .overlap-badge.fit1{color:var(--blue);border-color:rgba(215,255,61,.5);background:rgba(215,255,61,.15);}
+  .overlap-badge.fit2{color:var(--amber);border-color:rgba(240,178,60,.4);background:rgba(240,178,60,.1);}
+  .overlap-badge.little{color:var(--red);border-color:rgba(255,92,108,.3);background:rgba(255,92,108,.05);}
+  .overlap-badge.none{color:var(--muted);}
+
+  .add-row{
+    display:flex;gap:8px;margin-top:12px;
+  }
+  .add-row input{flex:1;}
+  .add-btn{
+    background:var(--lime);
+    border:none;color:#0A0A0A;
+    font-weight:800;
+    padding:0 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+  }
+  .add-btn:hover{filter:brightness(1.08);}
+
+  .backup-card{
+    margin-top:22px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .backup-card .label{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .backup-card .note{color:var(--muted);font-weight:600;font-size:12px;margin-top:2px;}
+  .backup-card .free-input{width:260px;}
+  .legend{
+    display:flex;gap:18px;margin-top:14px;
+    color:var(--muted);font-weight:600;font-size:12px;flex-wrap:wrap;
+  }
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend .dot{width:8px;height:8px;border-radius:50%;}
+  .status-line{
+    font-size:12px;color:var(--muted);font-weight:600;
+    margin-top:10px;height:16px;
+  }
+  .hint{
+    font-size:11px;color:var(--muted);font-weight:600;margin-top:6px;
+  }
+  .section-label{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    display:flex;align-items:center;gap:8px;
+    margin:22px 0 10px;
+  }
+
+  @media (max-width: 720px){
+    .table-scroll{overflow-x:visible;border:none;}
+    table{min-width:0;width:100%;}
+    thead{display:none;}
+    tbody tr{
+      display:block;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:var(--panel);
+      margin-bottom:10px;
+      padding:6px 4px;
+    }
+    tbody tr:hover{background:var(--panel);}
+    td{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:7px 10px;
+      border-bottom:1px dashed var(--line);
+    }
+    td:last-child{border-bottom:none;}
+    td::before{
+      content:attr(data-label);
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      font-weight:700;
+      color:var(--muted);
+      flex-shrink:0;
+    }
+    td[data-label=""]::before{display:none;}
+    .name-cell{font-size:15px;}
+    .free-input{text-align:right;}
+    div[style*="flex:1;min-width:340px"]{min-width:0;}
+    .slots-row{display:block;}
+    .suggest-card{margin-top:14px;}
+  }
+</style>
+</head>
+<body>
+<div class="board">
+  <div class="hero-title">
+    <h1>Доска <span class="accent">техничек</span></h1>
+    <p class="sub">Загрузите скриншот календаря или впишите свободные окна вручную — доска сама предложит удобные слоты на 2ч и 1,5ч и подскажет, кого с кем ставить.</p>
+    <div class="plan-counter" id="planCounter"></div>
+  </div>
+  <div class="top">
+    <div>
+      <div class="week-field">
+        <label>Неделя</label>
+        <input type="text" id="weekInput" placeholder="напр. 06–12 июля">
+      </div>
+    </div>
+    <div class="week-field">
+      <label>План техничек на неделю</label>
+      <input type="text" id="weekPlanInput" placeholder="напр. 10" style="width:120px;font-family:'JetBrains Mono',monospace;">
+    </div>
+    <div class="oblig-field" style="display:flex;gap:14px;align-items:flex-end;">
+      <div>
+        <label>День для загрузки календарей</label>
+        <input type="text" id="calDate" placeholder="ГГГГ-ММ-ДД" style="width:150px;font-family:'JetBrains Mono',monospace;">
+      </div>
+      <div>
+        <label>Рабочие часы с</label>
+        <input type="text" id="calWorkStart" value="09:00" style="width:80px;font-family:'JetBrains Mono',monospace;">
+      </div>
+      <div>
+        <label>до</label>
+        <input type="text" id="calWorkEnd" value="18:00" style="width:80px;font-family:'JetBrains Mono',monospace;">
+      </div>
+    </div>
+    <div class="oblig-field">
+      <label>Обязательства на неделю</label>
+      <textarea id="obligInput" placeholder="напр. Иванова — обязательно 1–2 раза, в отпуске со след. недели"></textarea>
+    </div>
+    <button class="reset-btn" id="resetBtn">Новая неделя (сбросить счётчики)</button>
+  </div>
+  <div class="hint" id="calDateHint" style="margin:-8px 0 14px;">Укажите дату (ГГГГ-ММ-ДД), для которой считаем окна — тогда загрузка CSV-календаря заполнит «Свободен» автоматически.</div>
+
+  <div class="backup-card" id="screenshotPanel" style="display:block;padding:16px 18px;">
+    <div class="label" style="margin-bottom:8px;">📸 Определить окна по скриншоту календаря</div>
+    <div class="hint" style="margin:0 0 12px;">
+      Загружаете скриншот календаря (Outlook, Google Calendar и т.п.) → кликаете 1) в самый верхний левый угол сетки (пересечение первой строки времени и первого столбца) → 2) в самый нижний правый угол сетки (конец последней строки и последнего столбца) → указываете параметры сетки → жмёте «Распознать». Пустые/серые ячейки = свободно, закрашенные = занято.
+    </div>
+
+    <input type="file" accept="image/*" id="screenshotFile" style="margin-bottom:10px;">
+
+    <div style="max-width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin-bottom:12px;display:none;" id="canvasWrap">
+      <canvas id="calibCanvas" style="display:block;cursor:crosshair;"></canvas>
+    </div>
+    <div class="hint" id="clickHint" style="margin-bottom:12px;"></div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+      <div>
+        <label style="display:block;font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">Сетка: время с</label>
+        <input type="text" id="gridTimeStart" value="08:00" style="width:80px;font-family:'JetBrains Mono',monospace;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">до</label>
+        <input type="text" id="gridTimeEnd" value="20:00" style="width:80px;font-family:'JetBrains Mono',monospace;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">Шаг строки, мин</label>
+        <input type="text" id="gridStep" value="60" style="width:70px;font-family:'JetBrains Mono',monospace;">
+      </div>
+      <div style="flex:1;min-width:260px;">
+        <label style="display:block;font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">Имена столбцов слева направо (через запятую, без «Календарь»)</label>
+        <input type="text" id="gridColumns" placeholder="Имена людей слева направо через запятую, как в столбцах скриншота" style="width:100%;font-family:'JetBrains Mono',monospace;">
+      </div>
+    </div>
+
+    <button class="add-btn" id="recognizeBtn">Распознать сетку →</button>
+    <div class="status-line" id="screenshotStatus"></div>
+  </div>
+
+  <div class="section-label">✅ Чек-лист на неделю</div>
+  <div class="table-scroll" style="margin-bottom:22px;">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:24%">Интервьюер</th>
+        <th style="width:14%;text-align:center">Точно ставим</th>
+        <th style="width:14%;text-align:center">В отпуске</th>
+        <th style="width:48%">Ходит в паре с</th>
+      </tr>
+    </thead>
+    <tbody id="checklistBody"></tbody>
+  </table>
+  </div>
+
+  <div class="section-label">🗓️ Слоты и лимиты на неделю</div>
+  <div class="slots-row" style="display:block;">
+  <div class="table-scroll" style="margin-bottom:16px;">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:20%">Интервьюер</th>
+        <th style="width:26%">Свободен (окна)</th>
+        <th style="width:12%">№1 (2ч)</th>
+        <th style="width:12%">№2 (1,5ч)</th>
+        <th style="width:12%">Всего/лимит</th>
+        <th style="width:10%">Обязат.</th>
+        <th style="width:8%"></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  </div>
+  <details class="suggest-card" id="suggestCard" open>
+    <summary>💡 Кого с кем ставить</summary>
+    <div id="suggestList" class="suggest-list"></div>
+  </details>
+  </div>
+  <div class="hint">Формат окон: часы:минуты через дефис, несколько окон — через запятую. Пример: 09:30-12:00, 14:00-17:30</div>
+
+  <div class="add-row">
+    <input type="text" id="newName" placeholder="Имя нового интервьюера">
+    <button class="add-btn" id="addBtn">Добавить</button>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot" style="background:var(--muted)"></span>не занят</span>
+    <span><span class="dot" style="background:var(--green)"></span>занята техничка</span>
+    <span><span class="dot" style="background:var(--amber)"></span>лимит исчерпан (2/2)</span>
+    <span><span class="dot" style="background:var(--red)"></span>лимит превышен</span>
+  </div>
+
+  <div class="backup-card">
+    <div>
+      <div class="label" style="display:flex;align-items:center;gap:8px;">
+        <span style="color:var(--blue)">●</span>
+        <input type="text" id="backupName" placeholder="Имя подстраховки (напр. Иванова А)" style="background:transparent;border:none;border-bottom:1px dashed var(--line);color:var(--ink);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;padding:2px 0;width:220px;">
+        <span>— подстраховка</span>
+      </div>
+      <div class="note">третий участник во всех техничках, не считается в общем лимите</div>
+    </div>
+    <input type="text" id="backupFree" class="free-input" placeholder="её/его свободные окна, напр. 09:00-18:00">
+    <label class="cal-upload-btn" title="Загрузить Outlook CSV подстраховки">
+      📅<input type="file" accept=".csv,.CSV" id="backupCalFile" style="display:none;">
+    </label>
+    <div class="chip" id="backupChip" data-n="0"><span class="lamp"></span><span id="backupCount">0</span></div>
+  </div>
+
+  <div class="oblig-field" style="margin-top:22px;">
+    <label>📝 Сводка на неделю (текстом)</label>
+    <textarea id="summaryInput" style="width:100%;min-height:100px;" placeholder="Напр.: Иванову можно поставить сюда и взять с ней Петрова — пересечений нет. Календарь подстраховки не учитываем, её просто добавляем на встречу."></textarea>
+  </div>
+
+  <details class="suggest-card" id="archiveCard" style="margin-top:22px;">
+    <summary>🗂️ История недель</summary>
+    <div id="archiveList" class="suggest-list"></div>
+  </details>
+
+  <div class="status-line" id="statusLine"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'tech-board-state';
+const SHARED = true;
+
+// ---------------------------------------------------------------------
+// Парсинг "сырой" выгрузки Outlook (busy-события) → свободные окна на день
+// ---------------------------------------------------------------------
+
+const CP1251_HIGH = 'ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏђ‘’“”•–—\ufffd™љ›њќћџ\u00a0ЎўЈ¤Ґ¦§Ё©Є«¬\u00ad®Ї°±Ііґµ¶·ё№є»јЅѕїАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя';
+
+function decodeMixed(bytes){
+  let result = '';
+  let i = 0;
+  const n = bytes.length;
+  while(i < n){
+    const b = bytes[i];
+    if(b < 0x80){ result += String.fromCharCode(b); i += 1; continue; }
+    let decoded = null;
+    for(const len of [4,3,2]){
+      if(i+len <= n){
+        try{
+          const s = new TextDecoder('utf-8', {fatal:true}).decode(bytes.subarray(i, i+len));
+          decoded = [s, len];
+          break;
+        }catch(e){}
+      }
+    }
+    if(decoded){ result += decoded[0]; i += decoded[1]; }
+    else { result += CP1251_HIGH[b - 0x80] || '\ufffd'; i += 1; }
+  }
+  return result;
+}
+
+function parseOutlookCsvText(text){
+  if(text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const rows = [];
+  let field = '', row = [], inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\r'){}
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  if(!rows.length) return [];
+  const headers = rows[0];
+  return rows.slice(1).filter(r=>r.length>1).map(r=>{
+    const obj = {};
+    headers.forEach((h,idx)=> obj[h] = r[idx]);
+    return obj;
+  });
+}
+
+function parseOutlookDate(d){
+  const [day, month, year] = d.split('.').map(x=>parseInt(x,10));
+  return {y:year, m:month, d:day};
+}
+function parseOutlookTime(t){
+  const [h,m] = t.split(':').map(x=>parseInt(x,10));
+  return h*60+m;
+}
+function pad2(n){ return n < 10 ? '0'+n : ''+n; }
+function dateKeyStr(y,m,d){ return `${y}-${pad2(m)}-${pad2(d)}`; }
+function minutesToHHMM2(min){ return `${pad2(Math.floor(min/60))}:${pad2(min%60)}`; }
+function daysInMonth2(y,m){ return new Date(y, m, 0).getDate(); }
+function addDay2(y,m,d){
+  d += 1;
+  if(d > daysInMonth2(y,m)){ d = 1; m += 1; if(m>12){ m=1; y+=1; } }
+  return {y,m,d};
+}
+
+function extractBusyEvents(rows){
+  const busyByDate = {};
+  let skippedAllDay = 0;
+  rows.forEach(r=>{
+    const isAllDay = (r['Целый день'] || '').trim() === 'Истина';
+    if(isAllDay){ skippedAllDay++; return; }
+    const sd = r['Дата начала'], st = r['Время начала'];
+    const ed = r['Дата завершения'], et = r['Время завершения'];
+    if(!sd || !st || !ed || !et) return;
+
+    let {y,m,d} = parseOutlookDate(sd);
+    const startDateObj = {y,m,d};
+    const endDate = parseOutlookDate(ed);
+    const startMin = parseOutlookTime(st);
+    const endMin = parseOutlookTime(et);
+
+    while(true){
+      const isFirst = (y===startDateObj.y && m===startDateObj.m && d===startDateObj.d);
+      const isLast  = (y===endDate.y && m===endDate.m && d===endDate.d);
+      const dayStart = isFirst ? startMin : 0;
+      const dayEnd   = isLast ? endMin : 24*60;
+      const key = dateKeyStr(y,m,d);
+      if(!busyByDate[key]) busyByDate[key] = [];
+      if(dayEnd > dayStart) busyByDate[key].push([dayStart, dayEnd]);
+      if(isLast) break;
+      ({y,m,d} = addDay2(y,m,d));
+    }
+  });
+  return {busyByDate, skippedAllDay};
+}
+
+function mergeIntervals(intervals){
+  if(!intervals.length) return [];
+  const sorted = [...intervals].sort((a,b)=>a[0]-b[0]);
+  const merged = [sorted[0].slice()];
+  for(let i=1;i<sorted.length;i++){
+    const last = merged[merged.length-1];
+    if(sorted[i][0] <= last[1]) last[1] = Math.max(last[1], sorted[i][1]);
+    else merged.push(sorted[i].slice());
+  }
+  return merged;
+}
+
+function freeWindowsString(busyByDate, dateKey, workStartMin, workEndMin){
+  const busy = mergeIntervals(busyByDate[dateKey] || []);
+  const free = [];
+  let cursor = workStartMin;
+  busy.forEach(([bs,be])=>{
+    if(bs > cursor) free.push([cursor, Math.min(bs, workEndMin)]);
+    cursor = Math.max(cursor, be);
+  });
+  if(cursor < workEndMin) free.push([cursor, workEndMin]);
+  return free
+    .filter(([s,e]) => e > s)
+    .map(([s,e]) => `${minutesToHHMM2(s)}-${minutesToHHMM2(e)}`)
+    .join(', ');
+}
+
+// ---------------------------------------------------------------------
+// Распознавание занятости по скриншоту календаря (по насыщенности цвета)
+// ---------------------------------------------------------------------
+
+let screenshotImg = null;
+let calibPoints = []; // [{x,y}, {x,y}] в координатах исходного изображения
+let canvasScale = 1;
+
+const screenshotFileEl = document.getElementById('screenshotFile');
+const calibCanvas = document.getElementById('calibCanvas');
+const canvasWrap = document.getElementById('canvasWrap');
+const clickHintEl = document.getElementById('clickHint');
+
+screenshotFileEl.addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      screenshotImg = img;
+      calibPoints = [];
+      const panel = document.getElementById('screenshotPanel');
+      const availableW = (panel.clientWidth || 700) - 40;
+      canvasScale = Math.min(1, availableW / img.width);
+      calibCanvas.width = Math.round(img.width * canvasScale);
+      calibCanvas.height = Math.round(img.height * canvasScale);
+      const ctx = calibCanvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, calibCanvas.width, calibCanvas.height);
+      canvasWrap.style.display = 'block';
+      clickHintEl.textContent = 'Клик 1 из 2: отметьте верхний левый угол сетки (пересечение первой строки времени и первого столбца)';
+    };
+    img.onerror = () => {
+      clickHintEl.textContent = 'Не получилось открыть картинку — попробуйте другой файл (PNG/JPG).';
+    };
+    img.src = ev.target.result;
+  };
+  reader.onerror = () => {
+    clickHintEl.textContent = 'Не получилось прочитать файл.';
+  };
+  reader.readAsDataURL(file);
+});
+
+calibCanvas.addEventListener('click', (e)=>{
+  if(!screenshotImg) return;
+  const rect = calibCanvas.getBoundingClientRect();
+  const cx = (e.clientX - rect.left) * (calibCanvas.width / rect.width);
+  const cy = (e.clientY - rect.top) * (calibCanvas.height / rect.height);
+  const imgX = cx / canvasScale;
+  const imgY = cy / canvasScale;
+
+  calibPoints.push({x: imgX, y: imgY});
+
+  const ctx = calibCanvas.getContext('2d');
+  ctx.strokeStyle = '#D7FF3D';
+  ctx.lineWidth = 2;
+  // яркий крестик через весь холст, чтобы точку было точно видно
+  ctx.beginPath();
+  ctx.moveTo(cx, 0); ctx.lineTo(cx, calibCanvas.height);
+  ctx.moveTo(0, cy); ctx.lineTo(calibCanvas.width, cy);
+  ctx.stroke();
+  ctx.fillStyle = '#D7FF3D';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 6, 0, Math.PI*2);
+  ctx.fill();
+
+  if(calibPoints.length === 1){
+    clickHintEl.textContent = 'Клик 2 из 2: отметьте нижний правый угол сетки (конец последней строки и последнего столбца)';
+  } else if(calibPoints.length === 2){
+    clickHintEl.textContent = 'Готово, обе точки отмечены. Проверьте параметры сетки ниже и нажмите «Распознать».';
+  } else {
+    // третий клик — начинаем заново
+    calibPoints = [{x: imgX, y: imgY}];
+    ctx.drawImage(screenshotImg, 0, 0, calibCanvas.width, calibCanvas.height);
+    ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2); ctx.stroke();
+    clickHintEl.textContent = 'Начали заново. Клик 2 из 2: нижний правый угол сетки.';
+  }
+});
+
+function saturation(r,g,b){
+  const max = Math.max(r,g,b)/255, min = Math.min(r,g,b)/255;
+  return max === 0 ? 0 : (max-min)/max;
+}
+
+function sampleCellBusy(ctx, cx, cy){
+  // усредняем небольшую область вокруг центра ячейки, чтобы не попасть
+  // на текст/границу
+  const offsets = [[0,0],[-6,-4],[6,-4],[-6,4],[6,4]];
+  let sat = 0, n = 0;
+  offsets.forEach(([dx,dy])=>{
+    const x = Math.round(cx+dx), y = Math.round(cy+dy);
+    try{
+      const d = ctx.getImageData(x, y, 1, 1).data;
+      sat += saturation(d[0], d[1], d[2]);
+      n++;
+    }catch(e){}
+  });
+  return n ? sat/n : 0;
+}
+
+function timeToMinutes(t){
+  const [h,m] = t.trim().split(':').map(Number);
+  return h*60 + (m||0);
+}
+
+document.getElementById('recognizeBtn').addEventListener('click', ()=>{
+  const statusEl = document.getElementById('screenshotStatus');
+  if(!screenshotImg || calibPoints.length !== 2){
+    statusEl.textContent = 'Сначала загрузите картинку и отметьте 2 угла сетки кликами';
+    return;
+  }
+  const colsRaw = document.getElementById('gridColumns').value.trim();
+  if(!colsRaw){ statusEl.textContent = 'Впишите имена столбцов через запятую'; return; }
+  const columnNames = colsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+
+  const tStart = timeToMinutes(document.getElementById('gridTimeStart').value);
+  const tEnd = timeToMinutes(document.getElementById('gridTimeEnd').value);
+  const step = parseInt(document.getElementById('gridStep').value, 10) || 60;
+  const rows = Math.round((tEnd - tStart) / step);
+  if(rows <= 0){ statusEl.textContent = 'Проверьте время сетки — конец должен быть позже начала'; return; }
+
+  // Рисуем изображение в полном разрешении на отдельный canvas для точного
+  // сэмплирования пикселей (без масштаба отображения)
+  const full = document.createElement('canvas');
+  full.width = screenshotImg.width;
+  full.height = screenshotImg.height;
+  const fctx = full.getContext('2d');
+  fctx.drawImage(screenshotImg, 0, 0);
+
+  const [p1, p2] = calibPoints;
+  const gx0 = Math.min(p1.x, p2.x), gx1 = Math.max(p1.x, p2.x);
+  const gy0 = Math.min(p1.y, p2.y), gy1 = Math.max(p1.y, p2.y);
+  const colWidth = (gx1 - gx0) / columnNames.length;
+  const rowHeight = (gy1 - gy0) / rows;
+
+  const calDate = document.getElementById('calDate').value.trim();
+  const workStartMin = parseOutlookTime(document.getElementById('calWorkStart').value);
+  const workEndMin = parseOutlookTime(document.getElementById('calWorkEnd').value);
+  const THRESHOLD = 0.08;
+
+  const matched = [], unmatched = [];
+
+  columnNames.forEach((colName, ci) => {
+    const busy = [];
+    for(let ri = 0; ri < rows; ri++){
+      const cx = gx0 + (ci + 0.5) * colWidth;
+      const cy = gy0 + (ri + 0.5) * rowHeight;
+      const sat = sampleCellBusy(fctx, cx, cy);
+      if(sat > THRESHOLD){
+        const cellStart = tStart + ri*step;
+        busy.push([cellStart, cellStart+step]);
+      }
+    }
+    const merged = mergeIntervals(busy);
+    let freeStr;
+    if(calDate){
+      const busyByDate = {[calDate]: merged};
+      freeStr = freeWindowsString(busyByDate, calDate, workStartMin, workEndMin);
+    } else {
+      // без даты — просто выводим свободные окна в пределах сетки как есть
+      const busyByDate = {'_': merged};
+      freeStr = freeWindowsString(busyByDate, '_', tStart, tEnd);
+    }
+
+    // сопоставляем имя столбца с человеком на доске
+    const lname = colName.toLowerCase();
+    let person = state.people.find(p => p.name.toLowerCase().includes(lname) || lname.includes(p.name.toLowerCase().split(' ')[0]));
+    const backupFirstName = (state.backupName||'').toLowerCase().split(' ')[0];
+    if(!person && backupFirstName && (lname.includes(backupFirstName) || backupFirstName.includes(lname))){
+      state.backupFree = freeStr;
+      matched.push(`${colName} → ${state.backupName} (подстраховка)`);
+      return;
+    }
+    if(person){
+      person.free = freeStr;
+      matched.push(`${colName} → ${person.name}`);
+    } else {
+      unmatched.push(colName);
+    }
+  });
+
+  render();
+  saveState();
+
+  let msg = `Распознано столбцов: ${columnNames.length}. Сопоставлено: ${matched.length}.`;
+  if(unmatched.length) msg += ` Не нашёл на доске: ${unmatched.join(', ')} — впишите им окна вручную или проверьте написание имени.`;
+  statusEl.textContent = msg;
+});
+
+async function handleCalendarUpload(targetId, file){
+  const calDate = document.getElementById('calDate').value.trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(calDate)){
+    setStatus('сначала укажите дату (ГГГГ-ММ-ДД) сверху');
+    return;
+  }
+  const workStartMin = parseOutlookTime(document.getElementById('calWorkStart').value + ':00');
+  const workEndMin = parseOutlookTime(document.getElementById('calWorkEnd').value + ':00');
+
+  try{
+    const buf = await file.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    const text = decodeMixed(bytes);
+    const rows = parseOutlookCsvText(text);
+    const {busyByDate} = extractBusyEvents(rows);
+    const freeStr = freeWindowsString(busyByDate, calDate, workStartMin, workEndMin);
+
+    if(targetId === 'backup'){
+      state.backupFree = freeStr;
+    } else {
+      const person = state.people.find(p=>p.id===targetId);
+      if(person) person.free = freeStr;
+    }
+    render();
+    saveState();
+    setStatus(freeStr ? `окна на ${calDate} подставлены` : `на ${calDate} свободных окон не найдено`);
+  }catch(e){
+    setStatus('ошибка чтения файла: ' + e.message);
+  }
+}
+
+const defaultState = {
+  week: '',
+  weekPlan: 0,
+  obligations: '',
+  backupFree: '',
+  backupName: '',
+  summary: '',
+  people: [],
+  backupCount: 0,
+  archive: []
+};
+
+let state = null;
+
+function setStatus(msg){
+  const el = document.getElementById('statusLine');
+  el.textContent = msg;
+  if(msg) setTimeout(()=>{ if(el.textContent===msg) el.textContent=''; }, 1800);
+}
+
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, SHARED);
+    if(res && res.value){
+      state = JSON.parse(res.value);
+      state.people.forEach(p=>{
+        if(p.free===undefined) p.free='';
+        if(p.vacation===undefined) p.vacation=false;
+        if(p.pairWith===undefined) p.pairWith='';
+      });
+      if(state.backupFree===undefined) state.backupFree='';
+      if(state.summary===undefined) state.summary='';
+      if(state.weekPlan===undefined) state.weekPlan=0;
+      if(state.backupName===undefined) state.backupName='';
+      if(state.archive===undefined) state.archive=[];
+    } else {
+      state = JSON.parse(JSON.stringify(defaultState));
+    }
+  }catch(e){
+    state = JSON.parse(JSON.stringify(defaultState));
+  }
+  render();
+}
+
+async function saveState(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state), SHARED);
+    setStatus('сохранено');
+  }catch(e){
+    setStatus('ошибка сохранения');
+  }
+}
+
+function cycle(val){
+  return val >= 3 ? 0 : val + 1;
+}
+
+function timeToMin(t){
+  const parts = t.trim().split(':');
+  if(parts.length!==2) return null;
+  const h = parseInt(parts[0],10), m = parseInt(parts[1],10);
+  if(isNaN(h)||isNaN(m)) return null;
+  return h*60+m;
+}
+
+function parseIntervals(str){
+  if(!str || !str.trim()) return [];
+  const chunks = str.split(',');
+  const out = [];
+  chunks.forEach(c=>{
+    const parts = c.trim().split('-');
+    if(parts.length!==2) return;
+    const s = timeToMin(parts[0]);
+    const e = timeToMin(parts[1]);
+    if(s===null||e===null||e<=s) return;
+    out.push([s,e]);
+  });
+  return out;
+}
+
+function bestOverlap(listA, listB){
+  let best = null;
+  listA.forEach(a=>{
+    listB.forEach(b=>{
+      const s = Math.max(a[0], b[0]);
+      const e = Math.min(a[1], b[1]);
+      if(e > s){
+        const dur = e - s;
+        if(!best || dur > best.dur){
+          best = {s,e,dur};
+        }
+      }
+    });
+  });
+  return best;
+}
+
+function minToTime(m){
+  const h = Math.floor(m/60).toString().padStart(2,'0');
+  const mm = (m%60).toString().padStart(2,'0');
+  return h+':'+mm;
+}
+
+function computePairSuggestions(){
+  const active = state.people.filter(p=>!p.vacation && p.free && p.free.trim());
+  const results = [];
+  for(let i=0;i<active.length;i++){
+    for(let j=i+1;j<active.length;j++){
+      const a = active[i], b = active[j];
+      const overlap = bestOverlap(parseIntervals(a.free), parseIntervals(b.free));
+      if(!overlap || overlap.dur < 90) continue;
+      results.push({a, b, overlap});
+    }
+  }
+  results.sort((x,y)=>y.overlap.dur - x.overlap.dur);
+  return results;
+}
+
+function render(){
+  document.getElementById('weekInput').value = state.week || '';
+  document.getElementById('weekPlanInput').value = state.weekPlan || '';
+  document.getElementById('obligInput').value = state.obligations || '';
+  document.getElementById('backupFree').value = state.backupFree || '';
+  document.getElementById('backupName').value = state.backupName || '';
+  document.getElementById('summaryInput').value = state.summary || '';
+
+  const planned = state.people.reduce((sum,p)=>sum + (p.t1||0) + (p.t2||0), 0);
+  const planTarget = parseInt(state.weekPlan,10) || 0;
+  const planEl = document.getElementById('planCounter');
+  if(!planTarget){
+    planEl.innerHTML = `<span>Укажите план на неделю, чтобы видеть прогресс</span>`;
+    planEl.className = 'plan-counter';
+  } else {
+    const pct = Math.min(100, Math.round((planned/planTarget)*100));
+    const done = planned >= planTarget;
+    planEl.className = 'plan-counter' + (done ? ' done' : (pct>=60 ? '' : ' warn'));
+    planEl.innerHTML = `<span>Набрано <span class="n">${planned}</span> из <span class="n">${planTarget}</span> техничек</span><span class="bar"><span class="bar-fill" style="width:${pct}%"></span></span>`;
+  }
+
+  const backupIntervals = parseIntervals(state.backupFree);
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  state.people.forEach(p=>{
+    const tr = document.createElement('tr');
+    if(p.mandatory) tr.classList.add('mandatory');
+    if(p.vacation) tr.classList.add('vacation');
+    const hasNoFree = !p.vacation && (!p.free || !p.free.trim());
+    if(hasNoFree) tr.classList.add('no-free');
+
+    const total = p.t1 + p.t2;
+    let totalClass = 'ok';
+    if(total === p.limit) totalClass = 'full';
+    if(total > p.limit) totalClass = 'over';
+
+    tr.innerHTML = `
+      <td data-label=""><div class="name-cell">${p.mandatory ? '<span class="star">&#9733;</span>' : ''}${p.name}</div></td>
+      <td data-label="Свободен">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="text" class="free-input" data-id="${p.id}" data-action="free" value="${p.free||''}" placeholder="10:00-13:00, 15:00-18:00" style="flex:1;">
+          <label class="cal-upload-btn" title="Загрузить Outlook CSV этого человека">
+            📅<input type="file" accept=".csv,.CSV" class="cal-file-input" data-id="${p.id}" style="display:none;">
+          </label>
+        </div>
+      </td>
+      <td data-label="№1 (2ч)"><div class="chip" data-n="${p.t1}" data-id="${p.id}" data-field="t1"><span class="lamp"></span><span>${p.t1}</span></div></td>
+      <td data-label="№2 (1,5ч)"><div class="chip" data-n="${p.t2}" data-id="${p.id}" data-field="t2"><span class="lamp"></span><span>${p.t2}</span></div></td>
+      <td data-label="Всего/лимит" class="total-cell ${totalClass}">${total} / ${p.limit}</td>
+      <td data-label="Обязат."><div class="mand-toggle ${p.mandatory?'active':''}" data-id="${p.id}" data-action="mandatory">${p.mandatory?'&#9733;':''}</div></td>
+      <td data-label=""><button class="del-btn" data-id="${p.id}" data-action="delete">&times;</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const checklistBody = document.getElementById('checklistBody');
+  checklistBody.innerHTML = '';
+  state.people.forEach(p=>{
+    const tr = document.createElement('tr');
+    if(p.mandatory) tr.classList.add('mandatory');
+    if(p.vacation) tr.classList.add('vacation');
+    tr.innerHTML = `
+      <td data-label=""><div class="name-cell">${p.mandatory ? '<span class="star">&#9733;</span>' : ''}${p.name}</div></td>
+      <td data-label="Точно ставим"><div class="mand-toggle ${p.mandatory?'active':''}" data-id="${p.id}" data-action="mandatory" title="Точно ставим на этой неделе">${p.mandatory?'&#9733;':''}</div></td>
+      <td data-label="В отпуске"><div class="vac-toggle ${p.vacation?'active':''}" data-id="${p.id}" data-action="vacation" title="В отпуске / недоступен">${p.vacation?'&#10003;':''}</div></td>
+      <td data-label="Пара"><input type="text" class="free-input" data-id="${p.id}" data-action="pair" value="${p.pairWith||''}" placeholder="напр. Имя Фамилия" style="width:100%;"></td>
+    `;
+    checklistBody.appendChild(tr);
+  });
+
+  document.getElementById('backupChip').setAttribute('data-n', state.backupCount);
+  document.getElementById('backupCount').textContent = state.backupCount;
+
+  const suggestions = computePairSuggestions();
+  const suggestList = document.getElementById('suggestList');
+  if(!suggestions.length){
+    suggestList.innerHTML = '<div class="suggest-empty">Пока нет пересечений — впишите окна свободного времени минимум двум людям (без отпуска).</div>';
+  } else {
+    suggestList.innerHTML = suggestions.map(s=>{
+      const durH = (s.overlap.dur/60).toFixed(1).replace('.0','');
+      const timeStr = minToTime(s.overlap.s)+'–'+minToTime(s.overlap.e);
+      const fitClass = s.overlap.dur >= 120 ? 'fit1' : 'fit2';
+      const fitLabel = s.overlap.dur >= 120 ? '№1' : '№2';
+      return `<div class="suggest-item">
+        <span class="suggest-names">${s.a.name} + ${s.b.name}</span>
+        <span class="overlap-badge ${fitClass}">${timeStr} (${durH}ч) &#10003; ${fitLabel}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const archiveList = document.getElementById('archiveList');
+  const archive = state.archive || [];
+  document.querySelector('#archiveCard summary').textContent = `🗂️ История недель (${archive.length})`;
+  if(!archive.length){
+    archiveList.innerHTML = '<div class="suggest-empty">Пока пусто — записи появляются здесь при нажатии «Новая неделя».</div>';
+  } else {
+    archiveList.innerHTML = archive.map(a=>{
+      const dateStr = new Date(a.savedAt).toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric'});
+      const totalDone = a.people.reduce((s,p)=>s+p.total,0);
+      const planStr = a.weekPlan ? ` · план ${a.weekPlan}` : '';
+      const chips = a.people.map(p=>`<span class="arch-chip ${p.total>0?'has':''}">${p.name.split(' ')[0]}: ${p.total}</span>`).join('');
+      return `<div class="archive-item">
+        <div class="arch-head">
+          <span>${a.week}</span>
+          <button class="archive-del" data-id="${a.id}" title="Удалить запись">&times;</button>
+        </div>
+        <div class="arch-meta">сохранено ${dateStr} · набрано ${totalDone}${planStr}</div>
+        <div class="arch-people">${chips}</div>
+      </div>`;
+    }).join('');
+  }
+
+  attachHandlers();
+}
+
+function attachHandlers(){
+  document.querySelectorAll('.chip[data-field]').forEach(chip=>{
+    chip.onclick = () => {
+      const id = chip.getAttribute('data-id');
+      const field = chip.getAttribute('data-field');
+      const person = state.people.find(p=>p.id===id);
+      person[field] = cycle(person[field]);
+      render();
+      saveState();
+    };
+  });
+
+  document.querySelectorAll('.mand-toggle').forEach(btn=>{
+    btn.onclick = () => {
+      const id = btn.getAttribute('data-id');
+      const person = state.people.find(p=>p.id===id);
+      person.mandatory = !person.mandatory;
+      render();
+      saveState();
+    };
+  });
+
+  document.querySelectorAll('.vac-toggle').forEach(btn=>{
+    btn.onclick = () => {
+      const id = btn.getAttribute('data-id');
+      const person = state.people.find(p=>p.id===id);
+      person.vacation = !person.vacation;
+      render();
+      saveState();
+    };
+  });
+
+  document.querySelectorAll('input.free-input[data-action="pair"]').forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const id = inp.getAttribute('data-id');
+      const person = state.people.find(p=>p.id===id);
+      person.pairWith = e.target.value;
+      saveState();
+    });
+  });
+
+  document.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.onclick = () => {
+      const id = btn.getAttribute('data-id');
+      const person = state.people.find(p=>p.id===id);
+      if(person && !confirm(`Удалить «${person.name}» из доски? Это действие нельзя отменить.`)) return;
+      state.people = state.people.filter(p=>p.id!==id);
+      render();
+      saveState();
+    };
+  });
+
+  document.querySelectorAll('input.free-input[data-action="free"]').forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const id = inp.getAttribute('data-id');
+      const person = state.people.find(p=>p.id===id);
+      person.free = e.target.value;
+      render();
+      saveState();
+    });
+  });
+
+  document.querySelectorAll('.cal-file-input').forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const id = inp.getAttribute('data-id');
+      const file = e.target.files[0];
+      if(file) handleCalendarUpload(id, file);
+      e.target.value = '';
+    });
+  });
+
+  document.querySelectorAll('.archive-del').forEach(btn=>{
+    btn.onclick = () => {
+      const id = btn.getAttribute('data-id');
+      if(!confirm('Удалить эту запись из истории недель?')) return;
+      state.archive = (state.archive||[]).filter(a=>a.id!==id);
+      render();
+      saveState();
+    };
+  });
+}
+
+document.getElementById('weekInput').addEventListener('change', e=>{
+  state.week = e.target.value;
+  saveState();
+});
+document.getElementById('weekPlanInput').addEventListener('change', e=>{
+  state.weekPlan = parseInt(e.target.value,10) || 0;
+  render();
+  saveState();
+});
+document.getElementById('obligInput').addEventListener('change', e=>{
+  state.obligations = e.target.value;
+  saveState();
+});
+document.getElementById('summaryInput').addEventListener('change', e=>{
+  state.summary = e.target.value;
+  saveState();
+});
+document.getElementById('backupFree').addEventListener('change', e=>{
+  state.backupFree = e.target.value;
+  render();
+  saveState();
+});
+document.getElementById('backupName').addEventListener('change', e=>{
+  state.backupName = e.target.value;
+  saveState();
+});
+document.getElementById('backupCalFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(file) handleCalendarUpload('backup', file);
+  e.target.value = '';
+});
+
+document.getElementById('addBtn').onclick = () => {
+  const input = document.getElementById('newName');
+  const name = input.value.trim();
+  if(!name) return;
+  const id = name.toLowerCase().replace(/[^a-zа-яё0-9]+/gi,'-') + '-' + Date.now();
+  state.people.push({id, name, mandatory:false, vacation:false, pairWith:'', t1:0, t2:0, limit:2, free:''});
+  input.value = '';
+  render();
+  saveState();
+};
+
+document.getElementById('backupChip').onclick = () => {
+  state.backupCount = cycle(state.backupCount);
+  render();
+  saveState();
+};
+
+document.getElementById('resetBtn').onclick = () => {
+  if(!confirm('Сбросить счётчики техничек у всех на 0? Текущая неделя сохранится в историю, список людей, окна времени и обязательства останутся.')) return;
+  const snapshot = {
+    id: 'w-' + Date.now(),
+    week: state.week || '(без названия)',
+    weekPlan: parseInt(state.weekPlan,10) || 0,
+    savedAt: new Date().toISOString(),
+    summary: state.summary || '',
+    people: state.people.map(p=>({name:p.name, t1:p.t1, t2:p.t2, total:p.t1+p.t2, mandatory:p.mandatory, vacation:p.vacation})),
+    backupCount: state.backupCount || 0
+  };
+  state.archive = state.archive || [];
+  state.archive.unshift(snapshot);
+  state.archive = state.archive.slice(0, 20);
+
+  state.people.forEach(p=>{ p.t1 = 0; p.t2 = 0; });
+  state.backupCount = 0;
+  render();
+  saveState();
+};
+
+loadState();
+</script>
+</body>
+</html>
